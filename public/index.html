@@ -10,6 +10,9 @@
   <body>
     <main>
     </main>
+    <div>
+        <p>append the <code>rowLength=N</code> query parameter to change row (&amp; column) length (<code>N</code> must be an integer.) default is <code>20</code>.</p>
+        <p>append the <code>seenThreshold=N</code> query parameter to change the <code>seen threshold</code>, the percentage of cells that need to be visited before the algorithm stops (<code>N</code> must be an integer. the algorithm will stop once <code>(rowLength * rowLength) * (seenThreshold / 100)</code> cells have been seen.) default is <code>75</code>.</p>
     <script src="sketch.js"></script>
   </body>
 </html>

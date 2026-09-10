@@ -2,18 +2,29 @@ const NORTH = Symbol("north");
 const SOUTH = Symbol("south");
 const EAST = Symbol("east");
 const WEST = Symbol("west");
-const CELL_COUNT = 10;
+const ROW_LENGTH_QUERY_PARAM = "rowLength";
+const SEEN_THRESHOLD_QUERY_PARAM = "seenThreshold";
+// const CELL_COUNT = 30;
+// const CELL_TOTAL = CELL_COUNT * CELL_COUNT;
+// const SEEN_THRESHOLD = 0.75;
+// const SEEN_LIMIT = Math.floor(CELL_TOTAL * SEEN_THRESHOLD);
 
+let CELL_COUNT;
+let CELL_TOTAL;
+let SEEN_THRESHOLD;
+let SEEN_LIMIT;
 let cellDim;
 let dim;
 let m;
 
 // biome-ignore lint/correctness/noUnusedVariables: p5
 function setup() {
+  getDimensions();
   dim = 0.9 * (windowWidth >= windowHeight ? windowHeight : windowWidth);
-  // round down to nearest 100
-  dim = dim - (dim % 100);
+  // round down
+  dim = dim - (dim % CELL_COUNT);
   cellDim = dim / CELL_COUNT;
+  console.log(`cellDim ${cellDim}`);
   const _canvas = createCanvas(dim, dim);
   m = new Maze3();
   window.maze = m;
@@ -22,7 +33,7 @@ function setup() {
 // biome-ignore lint/correctness/noUnusedVariables: p5
 function draw() {
   m.draw();
-  if (m.seen.size <= 75) {
+  if (m.seen.size <= SEEN_LIMIT) {
     m.openCell();
   }
 }
@@ -38,7 +49,7 @@ class Maze {
     this.cells = [];
     let x = 0;
     let y = 0;
-    for (let i = 1; i < 101; i++) {
+    for (let i = 1; i <= CELL_TOTAL; i++) {
       const cell = new cellCls(x, y);
       this.cells.push(cell);
       if (i % CELL_COUNT === 0) {
@@ -202,40 +213,20 @@ class Maze2 extends Maze {
   pathIx = 0;
   constructor() {
     super(Cell);
-    // this.openCells();
   }
   openCell() {
     const possibilities = this.neighborSidesOf(this.pathIx);
     if (possibilities.length === 0) {
-      this.pathIx = Math.floor(random(0, 100));
+      this.pathIx = Math.floor(random(0, CELL_TOTAL));
       return this.openCell();
     }
     const chosen = random(possibilities);
     const opp = this.opposite(chosen);
     this.cells[this.pathIx][chosen] = false;
     const newIx = this.move(this.pathIx, chosen);
-    // if (!this.onSide(k
     this.cells[newIx][opp] = false;
-    console.log(
-      `opened ${this.pathIx} ${pPrintDir(chosen)} ${newIx} ${pPrintDir(opp)}`,
-    );
     this.pathIx = newIx;
     return true;
-  }
-  openCells() {
-    let ix = 0;
-    let possibilities = this.neighborSidesOf(ix);
-    while (possibilities.length > 0) {
-      const chosen = random(possibilities);
-      this.cells[ix][chosen] = false;
-      const _oldIx = ix;
-      ix = this.move(_oldIx, chosen);
-      this.cells[ix][this.opposite(chosen)] = false;
-      console.log(
-        `moved ${pPrintDir(chosen)} from ${this.cells[_oldIx].stringify()} to ${this.cells[ix].stringify()}`,
-      );
-      possibilities = this.neighborSidesOf(ix);
-    }
   }
   opposite(dir) {
     switch (dir) {
@@ -250,16 +241,16 @@ class Maze2 extends Maze {
     }
   }
   onNorth(ix) {
-    return ix < 10;
+    return ix < CELL_COUNT;
   }
   onSouth(ix) {
-    return ix >= 90;
+    return ix >= CELL_COUNT * (CELL_COUNT - 1);
   }
   onEast(ix) {
-    return ix % 10 === 9;
+    return ix % CELL_COUNT === CELL_COUNT - 1;
   }
   onWest(ix) {
-    return ix % 10 === 0;
+    return ix % CELL_COUNT === 0;
   }
   move(ix, dir) {
     switch (dir) {
@@ -280,10 +271,10 @@ class Maze2 extends Maze {
     return ix - 1;
   }
   north(ix) {
-    return ix - 10;
+    return ix - CELL_COUNT;
   }
   south(ix) {
-    return ix + 10;
+    return ix + CELL_COUNT;
   }
   cellOpened(ix) {
     const c = this.cells[ix];
@@ -334,4 +325,13 @@ class Maze3 extends Maze2 {
 
 function pPrintDir(dir) {
   return dir.toString().replace(/Symbol\((\w+)\)/, "$1");
+}
+
+function getDimensions() {
+  const params = new URLSearchParams(window.location.search);
+  CELL_COUNT = parseInt(params.get(ROW_LENGTH_QUERY_PARAM) || 20, 10);
+  CELL_TOTAL = CELL_COUNT * CELL_COUNT;
+  SEEN_THRESHOLD =
+    parseInt(params.get(SEEN_THRESHOLD_QUERY_PARAM) || 75, 10) / 100;
+  SEEN_LIMIT = Math.floor(CELL_TOTAL * SEEN_THRESHOLD);
 }
