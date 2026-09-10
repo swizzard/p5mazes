@@ -1,4 +1,9 @@
+const NORTH = Symbol("north");
+const SOUTH = Symbol("south");
+const EAST = Symbol("east");
+const WEST = Symbol("west");
 const CELL_COUNT = 10;
+
 let cellDim;
 let dim;
 
@@ -21,6 +26,9 @@ class Maze {
   cellCls;
   cells;
   constructor(cellCls) {
+    console.log(
+      `creating ${CELL_COUNT} x ${CELL_COUNT} maze using ${cellCls.name}`,
+    );
     this.cellCls = cellCls;
     this.cells = [];
     let x = 0;
@@ -49,10 +57,10 @@ function draw() {}
 class Cell {
   startX;
   startY;
-  north = true;
-  south = true;
-  east = true;
-  west = true;
+  [NORTH] = true;
+  [SOUTH] = true;
+  [EAST] = true;
+  [WEST] = true;
   constructor(startX, startY) {
     this.startX = startX;
     this.startY = startY;
@@ -65,17 +73,20 @@ class Cell {
   get southY() {
     return this.startY + cellDim;
   }
+  get sides() {
+    return [this.north, this.south, this.east, this.west];
+  }
   draw() {
-    if (this.north) {
+    if (this[NORTH]) {
       line(this.startX, this.startY, this.eastX, this.startY);
     }
-    if (this.south) {
+    if (this[SOUTH]) {
       line(this.startX, this.southY, this.eastX, this.southY);
     }
-    if (this.east) {
+    if (this[EAST]) {
       line(this.eastX, this.startY, this.eastX, this.southY);
     }
-    if (this.west) {
+    if (this[WEST]) {
       line(this.startX, this.startY, this.startX, this.southY);
     }
   }
@@ -83,47 +94,32 @@ class Cell {
 
 class Cell1 extends Cell {
   setSides() {
-    const r = this.rand4;
-    if (r === 0) {
-      this.north = false;
-    } else if (r === 1) {
-      this.south = false;
-    } else if (r === 2) {
-      this.east = false;
-    } else if (r === 3) {
-      this.west = false;
-    }
+    this[this.rand4] = false;
   }
   get rand4() {
-    return random([0, 1, 2, 3]);
+    return random([NORTH, EAST, SOUTH, WEST]);
   }
 }
 
 class Cell2 extends Cell1 {
   setSides() {
-    const n = this.rand4;
+    const n = this.nSidesToOpen;
     if (n === 4) {
-      this.north = false;
-      this.south = false;
-      this.east = false;
-      this.west = false;
+      this[NORTH] = false;
+      this[SOUTH] = false;
+      this[EAST] = false;
+      this[WEST] = false;
     } else {
       for (let i = 0; i < n; i++) {
         this.openRandSide();
       }
     }
   }
+  get nSidesToOpen() {
+    return random([1, 2, 3, 4]);
+  }
   openRandSide() {
-    const r = this.rand4;
-    if (r === 0) {
-      this.north = false;
-    } else if (r === 1) {
-      this.south = false;
-    } else if (r === 2) {
-      this.east = false;
-    } else {
-      this.west = false;
-    }
+    this[this.rand4] = false;
   }
 }
 
@@ -131,7 +127,7 @@ class Cell3 extends Cell2 {
   setSides() {
     const n = this.nSidesToOpen;
     if (n === 4) {
-      this.north = this.south = this.east = this.west = false;
+      this[NORTH] = this[SOUTH] = this[EAST] = this[WEST] = false;
     } else if (n === 1) {
       this.openRandSide();
     } else {
@@ -140,21 +136,18 @@ class Cell3 extends Cell2 {
       }
     }
   }
-  get nSidesToOpen() {
-    return random([1, 2, 3, 4]);
-  }
   get nOpen() {
     let count = 0;
-    if (!this.north) {
+    if (!this[NORTH]) {
       count += 1;
     }
-    if (!this.south) {
+    if (!this[SOUTH]) {
       count += 1;
     }
-    if (!this.east) {
+    if (!this[EAST]) {
       count += 1;
     }
-    if (!this.west) {
+    if (!this[WEST]) {
       count += 1;
     }
     return count;
@@ -163,16 +156,16 @@ class Cell3 extends Cell2 {
 
 class Cell4 extends Cell3 {
   draw() {
-    if (this.north || this.onNorthernEdge) {
+    if (this[NORTH] || this.onNorthernEdge) {
       line(this.startX, this.startY, this.eastX, this.startY);
     }
-    if (this.south || this.onSouthernEdge) {
+    if (this[SOUTH] || this.onSouthernEdge) {
       line(this.startX, this.southY, this.eastX, this.southY);
     }
-    if (this.east || this.onEasternEdge) {
+    if (this[EAST] || this.onEasternEdge) {
       line(this.eastX, this.startY, this.eastX, this.southY);
     }
-    if (this.west || this.onWesternEdge) {
+    if (this[WEST] || this.onWesternEdge) {
       line(this.startX, this.startY, this.startX, this.southY);
     }
   }
@@ -194,5 +187,43 @@ class Cell4 extends Cell3 {
 class Cell5 extends Cell4 {
   get nSidesToOpen() {
     return random([2, 3]);
+  }
+}
+
+class Maze2 extends Maze {
+  pathIx = 0;
+  constructor() {
+    super(Cell);
+  }
+  get east() {
+    if (this.pathIx % 10 === 0) {
+      return undefined;
+    } else {
+      return this.pathIx - 1;
+    }
+  }
+  get west() {
+    if (this.pathIx % 10 === 9) {
+      return undefined;
+    } else {
+      return this.pathIx + 1;
+    }
+  }
+  get north() {
+    if (this.pathIx < 10) {
+      return undefined;
+    } else {
+      return this.pathIx - 10;
+    }
+  }
+  get south() {
+    if (this.pathIx >= 90) {
+      return undefined;
+    } else {
+      return this.pathIx + 10;
+    }
+  }
+  cellOpened(ix) {
+    this.cells[ix].some((v) => v);
   }
 }
