@@ -6,32 +6,40 @@ const ROW_LENGTH_QUERY_PARAM = "rowLength";
 const SEEN_THRESHOLD_QUERY_PARAM = "seenThreshold";
 const DEFAULT_ROW_LENGTH = 30;
 const DEFAULT_SEEN_THRESHOLD = 65;
+const MAZE_VERSION_QUERY_PARAM = "mazeVersion";
+const CELL_VERSION_QUERY_PARAM = "cellVersion";
 
 let CELL_COUNT;
 let CELL_TOTAL;
 let SEEN_THRESHOLD;
 let SEEN_LIMIT;
+let MAZE_CLS;
+let CELL_CLS;
 let cellDim;
 let dim;
 let m;
-let kill = false;
+let stop = false;
 
 // biome-ignore lint/correctness/noUnusedVariables: p5
 function setup() {
-  getDimensions();
+  getParams();
   dim = 0.9 * (windowWidth >= windowHeight ? windowHeight : windowWidth);
   // round down
   dim = dim - (dim % CELL_COUNT);
   cellDim = dim / CELL_COUNT;
   const _canvas = createCanvas(dim, dim);
-  m = new Maze5();
+  if (CELL_CLS) {
+    m = new MAZE_CLS(CELL_CLS);
+  } else {
+    m = new MAZE_CLS();
+  }
   window.maze = m;
 }
 
 // biome-ignore lint/correctness/noUnusedVariables: p5
 function draw() {
   m.draw();
-  if (!kill && m.seen.size <= SEEN_LIMIT) {
+  if (!stop && m.shouldContinue()) {
     m.openCell();
   }
 }
@@ -39,6 +47,7 @@ function draw() {
 class Maze {
   cellCls;
   cells;
+  stopIx = CELL_COUNT * (CELL_COUNT - 1);
   constructor(cellCls) {
     console.log(
       `creating ${CELL_COUNT} x ${CELL_COUNT} maze using ${cellCls.name}`,
@@ -65,6 +74,9 @@ class Maze {
     this.cells.forEach((c) => {
       c.draw();
     });
+  }
+  shouldContinue() {
+    return this.pathIx < this.stopIx;
   }
 }
 
@@ -209,8 +221,8 @@ class Cell5 extends Cell4 {
 
 class Maze2 extends Maze {
   pathIx = 0;
-  constructor() {
-    super(Cell);
+  constructor(cellCls) {
+    super(cellCls ?? Cell);
   }
   openCell() {
     const possibilities = this.neighborSidesOf(this.pathIx);
@@ -218,7 +230,7 @@ class Maze2 extends Maze {
       const _oIx = this.pathIx;
       this.jumpToRandom();
       if (this.pathIx === _oIx) {
-        kill = true;
+        stop = true;
         return false;
       } else {
         return this.openCell();
@@ -323,13 +335,16 @@ class Maze2 extends Maze {
 
 class Maze3 extends Maze2 {
   seen = new Set();
-  constructor() {
-    super();
+  constructor(cellCls) {
+    super(cellCls);
     this.seen.add(0);
   }
   openCell() {
     this.seen.add(this.pathIx);
     super.openCell();
+  }
+  shouldContinue() {
+    return this.seen.size <= SEEN_LIMIT;
   }
 }
 
@@ -368,7 +383,7 @@ class Maze5 extends Maze4 {
   }
 }
 
-function getDimensions() {
+function getParams() {
   const params = new URLSearchParams(window.location.search);
   CELL_COUNT = parseInt(
     params.get(ROW_LENGTH_QUERY_PARAM) || DEFAULT_ROW_LENGTH,
@@ -381,6 +396,41 @@ function getDimensions() {
       10,
     ) / 100;
   SEEN_LIMIT = Math.floor(CELL_TOTAL * SEEN_THRESHOLD);
+  switch (params.get(MAZE_VERSION_QUERY_PARAM)) {
+    case "1":
+      MAZE_CLS = Maze;
+      break;
+    case "2":
+      MAZE_CLS = Maze2;
+      break;
+    case "3":
+      MAZE_CLS = Maze3;
+      break;
+    case "4":
+      MAZE_CLS = Maze4;
+      break;
+    default:
+      MAZE_CLS = Maze5;
+  }
+  switch (params.get(CELL_VERSION_QUERY_PARAM)) {
+    case "1":
+      CELL_CLS = Cell1;
+      break;
+    case "2":
+      CELL_CLS = Cell2;
+      break;
+    case "3":
+      CELL_CLS = Cell3;
+      break;
+    case "4":
+      CELL_CLS = Cell4;
+      break;
+    case "5":
+      CELL_CLS = Cell5;
+      break;
+    default:
+      CELL_CLS = Cell;
+  }
 }
 
 function noisePick(arr, ...noiseArgs) {
