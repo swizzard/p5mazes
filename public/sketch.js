@@ -23,7 +23,7 @@ let stop = false;
 // biome-ignore lint/correctness/noUnusedVariables: p5
 function setup() {
   getParams();
-  dim = 0.9 * (windowWidth >= windowHeight ? windowHeight : windowWidth);
+  dim = 0.8 * (windowWidth >= windowHeight ? windowHeight : windowWidth);
   // round down
   dim = dim - (dim % CELL_COUNT);
   cellDim = dim / CELL_COUNT;
@@ -50,7 +50,7 @@ class Maze {
   stopIx = CELL_COUNT * (CELL_COUNT - 1);
   constructor(cellCls) {
     console.log(
-      `creating ${CELL_COUNT} x ${CELL_COUNT} maze using ${cellCls.name}`,
+      `creating ${CELL_COUNT} x ${CELL_COUNT} ${this.constructor.name} using ${cellCls.name}`,
     );
     this.cellCls = cellCls;
     this.cells = [];
@@ -389,47 +389,60 @@ function getParams() {
     params.get(ROW_LENGTH_QUERY_PARAM) || DEFAULT_ROW_LENGTH,
     10,
   );
+  document.getElementById("rowLength").value = CELL_COUNT;
   CELL_TOTAL = CELL_COUNT * CELL_COUNT;
-  SEEN_THRESHOLD =
-    parseInt(
-      params.get(SEEN_THRESHOLD_QUERY_PARAM) || DEFAULT_SEEN_THRESHOLD,
-      10,
-    ) / 100;
+  const st = parseInt(
+    params.get(SEEN_THRESHOLD_QUERY_PARAM) || DEFAULT_SEEN_THRESHOLD,
+    10,
+  );
+  document.getElementById("seenThreshold").value = st;
+  SEEN_THRESHOLD = st / 100;
   SEEN_LIMIT = Math.floor(CELL_TOTAL * SEEN_THRESHOLD);
   switch (params.get(MAZE_VERSION_QUERY_PARAM)) {
     case "1":
       MAZE_CLS = Maze;
+      document.querySelector('input.maze-picker[value="1"]').checked = true;
       break;
     case "2":
       MAZE_CLS = Maze2;
+      document.querySelector('input.maze-picker[value="2"]').checked = true;
       break;
     case "3":
       MAZE_CLS = Maze3;
+      document.querySelector('input.maze-picker[value="3"]').checked = true;
       break;
     case "4":
       MAZE_CLS = Maze4;
+      document.querySelector('input.maze-picker[value="4"]').checked = true;
       break;
     default:
       MAZE_CLS = Maze5;
+      document.querySelector('input.maze-picker[value="5"]').checked = true;
   }
   switch (params.get(CELL_VERSION_QUERY_PARAM)) {
     case "1":
       CELL_CLS = Cell1;
+      document.querySelector('input.cell-picker[value="1"]').checked = true;
       break;
     case "2":
       CELL_CLS = Cell2;
+      document.querySelector('input.cell-picker[value="2"]').checked = true;
       break;
     case "3":
       CELL_CLS = Cell3;
+      document.querySelector('input.cell-picker[value="3"]').checked = true;
       break;
     case "4":
       CELL_CLS = Cell4;
+      document.querySelector('input.cell-picker[value="4"]').checked = true;
       break;
     case "5":
       CELL_CLS = Cell5;
+      document.querySelector('input.cell-picker[value="5"]').checked = true;
       break;
     default:
       CELL_CLS = Cell;
+      document.querySelector('input.cell-picker[value="0"]').checked = true;
   }
 }
 

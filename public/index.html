@@ -8,11 +8,63 @@
 
   </head>
   <body>
-    <main>
-    </main>
-    <div>
-        <p>append the <code>rowLength=N</code> query parameter to change row (&amp; column) length (<code>N</code> must be an integer.) default is <code>30</code>.</p>
-        <p>append the <code>seenThreshold=N</code> query parameter to change the <code>seen threshold</code>, the percentage of cells that need to be visited before the algorithm stops (<code>N</code> must be an integer. the algorithm will stop once <code>(rowLength * rowLength) * (seenThreshold / 100)</code> cells have been seen.) default is <code>65</code>.</p>
+    <div id="content">
+        <main>
+        </main>
+        <div>
+            <form action="" method="get">
+                <div>
+                    <p>change row (&amp; column) length. default is <code>30</code></p>
+                    <label for="rowLength">row length</label>
+                    <input id="rowLength" name="rowLength" type="number" step="10" placeholder="30" />
+                </div>
+                <div>
+                    <p>
+                        change the <code>seen threshold</code>, the percentage of cells that need to be visited before the
+                        algorithm stops. the algorithm will stop once <code>(rowLength * rowLength) * (seenThreshold / 100)</code>
+                        cells have been seen. default is <code>65</code>.
+                    </p>
+                    <label for="seenThreshold">seen threshold</label>
+                    <input id="seenThreshold" name="seenThreshold" type="number" placeholder="65" />
+                </div>
+                <div>
+                    <p>change maze version. <code>maze 1</code> is static; the rest erase walls over time.</p>
+                    <div>
+                        <input type="radio" class="maze-picker" value="1" name="mazeVersion" />
+                        <label for="maze1">maze 1</label>
+                        <input type="radio" class="maze-picker" value="2" name="mazeVersion" />
+                        <label for="maze2">maze 2</label>
+                        <input type="radio" class="maze-picker" value="3" name="mazeVersion" />
+                        <label for="maze3">maze 3</label>
+                        <input type="radio" class="maze-picker" value="4" name="mazeVersion" />
+                        <label for="maze4">maze 4</label>
+                        <input type="radio" class="maze-picker" value="5" name="mazeVersion" />
+                        <label for="maze5">maze 5</label>
+                    </div>
+                </div>
+                <div>
+                    <p>change cell version. <code>cell 0</code> is static, the rest erase 0 - 4 walls when created. thus, combining <code>maze 1</code> &amp; <code>cell 0</code> will result in a static grid. it is recommended that you use <code>cell 0</code> unless you want to use <code>maze 1</code> and vice-versa.</p>
+                    <div>
+                        <input type="radio" class="cell-picker" value="0" name="cellVersion" />
+                        <label for="cell0">cell 0</label>
+                        <input type="radio" class="cell-picker" value="1" name="cellVersion" />
+                        <label for="cell1">cell 1</label>
+                        <input type="radio" class="cell-picker" value="2" name="cellVersion" />
+                        <label for="cell2">cell 2</label>
+                        <input type="radio" class="cell-picker" value="3" name="cellVersion" />
+                        <label for="cell3">cell 3</label>
+                        <input type="radio" class="cell-picker" value="4" name="cellVersion" />
+                        <label for="cell4">cell 4</label>
+                        <input type="radio" class="cell-picker" value="5" name="cellVersion" />
+                        <label for="cell5">cell 5</label>
+                    </div>
+                </div>
+                <div>
+                    <button type="submit">change</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script src="sketch.js"></script>
   </body>
 </html>

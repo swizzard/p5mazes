@@ -1,12 +1,21 @@
 body {
     background: #ccc;
 }
-main {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-
-    canvas {
-        margin-top: 3vw;
+div#content {
+    display: grid;
+    grid-template-rows: auto 10%;
+    main {
+        align-self: center;
+        justify-self: center;
     }
-}
+    div > form {
+        display: flex;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: 2fr 1fr;
+        /* input { */
+        /*     display: inline-grid; */
+        /* } */
+        > div {
+            border: 1px solid #000;
+        }
+    }
