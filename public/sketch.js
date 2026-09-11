@@ -24,7 +24,7 @@ function setup() {
   dim = dim - (dim % CELL_COUNT);
   cellDim = dim / CELL_COUNT;
   const _canvas = createCanvas(dim, dim);
-  m = new Maze4();
+  m = new Maze5();
   window.maze = m;
 }
 
@@ -224,13 +224,16 @@ class Maze2 extends Maze {
         return this.openCell();
       }
     }
-    const chosen = random(possibilities);
+    const chosen = this.chooseMove(possibilities);
     const opp = this.opposite(chosen);
     this.cells[this.pathIx][chosen] = false;
     const newIx = this.move(this.pathIx, chosen);
     this.cells[newIx][opp] = false;
     this.pathIx = newIx;
     return true;
+  }
+  chooseMove(possibilities) {
+    return random(possibilities);
   }
   jumpToRandom() {
     this.pathIx = Math.floor(random(0, CELL_TOTAL));
@@ -350,6 +353,21 @@ class Maze4 extends Maze3 {
   }
 }
 
+class Maze5 extends Maze4 {
+  nOpen(ix) {
+    const c = this.cells[ix];
+    return [NORTH, SOUTH, EAST, WEST].reduce((n, d) => (c[d] ? n : n + 1), 0);
+  }
+  chooseMove(possibilities) {
+    return noisePick(
+      possibilities,
+      this.pathIx,
+      this.nOpen(this.pathIx),
+      SEEN_LIMIT,
+    );
+  }
+}
+
 function getDimensions() {
   const params = new URLSearchParams(window.location.search);
   CELL_COUNT = parseInt(
@@ -363,4 +381,16 @@ function getDimensions() {
       10,
     ) / 100;
   SEEN_LIMIT = Math.floor(CELL_TOTAL * SEEN_THRESHOLD);
+}
+
+function noisePick(arr, ...noiseArgs) {
+  const t = 1 / arr.length;
+  const n = noise(...noiseArgs);
+  for (let ix = 1; ix <= arr.length; ix++) {
+    const th = t * ix;
+    if (n < th) {
+      return arr[ix - 1];
+    }
+  }
+  return arr[arr.length - 1];
 }
