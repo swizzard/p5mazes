@@ -4,10 +4,8 @@ const EAST = Symbol("east");
 const WEST = Symbol("west");
 const ROW_LENGTH_QUERY_PARAM = "rowLength";
 const SEEN_THRESHOLD_QUERY_PARAM = "seenThreshold";
-// const CELL_COUNT = 30;
-// const CELL_TOTAL = CELL_COUNT * CELL_COUNT;
-// const SEEN_THRESHOLD = 0.75;
-// const SEEN_LIMIT = Math.floor(CELL_TOTAL * SEEN_THRESHOLD);
+const DEFAULT_ROW_LENGTH = 30;
+const DEFAULT_SEEN_THRESHOLD = 65;
 
 let CELL_COUNT;
 let CELL_TOTAL;
@@ -16,6 +14,7 @@ let SEEN_LIMIT;
 let cellDim;
 let dim;
 let m;
+let kill = false;
 
 // biome-ignore lint/correctness/noUnusedVariables: p5
 function setup() {
@@ -24,16 +23,15 @@ function setup() {
   // round down
   dim = dim - (dim % CELL_COUNT);
   cellDim = dim / CELL_COUNT;
-  console.log(`cellDim ${cellDim}`);
   const _canvas = createCanvas(dim, dim);
-  m = new Maze3();
+  m = new Maze4();
   window.maze = m;
 }
 
 // biome-ignore lint/correctness/noUnusedVariables: p5
 function draw() {
   m.draw();
-  if (m.seen.size <= SEEN_LIMIT) {
+  if (!kill && m.seen.size <= SEEN_LIMIT) {
     m.openCell();
   }
 }
@@ -217,8 +215,14 @@ class Maze2 extends Maze {
   openCell() {
     const possibilities = this.neighborSidesOf(this.pathIx);
     if (possibilities.length === 0) {
-      this.pathIx = Math.floor(random(0, CELL_TOTAL));
-      return this.openCell();
+      const _oIx = this.pathIx;
+      this.jumpToRandom();
+      if (this.pathIx === _oIx) {
+        kill = true;
+        return false;
+      } else {
+        return this.openCell();
+      }
     }
     const chosen = random(possibilities);
     const opp = this.opposite(chosen);
@@ -227,6 +231,9 @@ class Maze2 extends Maze {
     this.cells[newIx][opp] = false;
     this.pathIx = newIx;
     return true;
+  }
+  jumpToRandom() {
+    this.pathIx = Math.floor(random(0, CELL_TOTAL));
   }
   opposite(dir) {
     switch (dir) {
@@ -318,20 +325,42 @@ class Maze3 extends Maze2 {
     this.seen.add(0);
   }
   openCell() {
-    super.openCell();
     this.seen.add(this.pathIx);
+    super.openCell();
   }
 }
 
-function pPrintDir(dir) {
-  return dir.toString().replace(/Symbol\((\w+)\)/, "$1");
+class Maze4 extends Maze3 {
+  get orderedSeen() {
+    return Array.from(this.seen.values()).toSorted((a, b) => b - a);
+  }
+  jumpToRandom() {
+    for (const val of this.orderedSeen) {
+      const candidateVal = val + 1;
+      if (
+        candidateVal !== CELL_TOTAL &&
+        candidateVal !== this.pathIx &&
+        !this.seen.has(candidateVal)
+      ) {
+        this.pathIx = candidateVal;
+        return;
+      }
+    }
+    super.jumpToRandom();
+  }
 }
 
 function getDimensions() {
   const params = new URLSearchParams(window.location.search);
-  CELL_COUNT = parseInt(params.get(ROW_LENGTH_QUERY_PARAM) || 20, 10);
+  CELL_COUNT = parseInt(
+    params.get(ROW_LENGTH_QUERY_PARAM) || DEFAULT_ROW_LENGTH,
+    10,
+  );
   CELL_TOTAL = CELL_COUNT * CELL_COUNT;
   SEEN_THRESHOLD =
-    parseInt(params.get(SEEN_THRESHOLD_QUERY_PARAM) || 75, 10) / 100;
+    parseInt(
+      params.get(SEEN_THRESHOLD_QUERY_PARAM) || DEFAULT_SEEN_THRESHOLD,
+      10,
+    ) / 100;
   SEEN_LIMIT = Math.floor(CELL_TOTAL * SEEN_THRESHOLD);
 }
