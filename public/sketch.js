@@ -19,9 +19,7 @@ let stop = false;
 // biome-ignore lint/correctness/noUnusedVariables: p5
 function setup() {
   getParams();
-  dim = 0.8 * (windowWidth >= windowHeight ? windowHeight : windowWidth);
-  // round down
-  dim = dim - (dim % CELL_COUNT);
+  dim = getDim(CELL_COUNT);
   cellDim = dim / CELL_COUNT;
   const _canvas = createCanvas(dim, dim);
   if (CELL_CLS) {
@@ -44,14 +42,6 @@ class Maze extends _M {
   stopIx = CELL_COUNT * (CELL_COUNT - 1);
   constructor(cellCls) {
     super(cellCls, CELL_COUNT, cellDim);
-  }
-  draw() {
-    background(51);
-    strokeWeight(4);
-    stroke("white");
-    this.cells.forEach((c) => {
-      c.draw();
-    });
   }
   shouldContinue() {
     return this.pathIx < this.stopIx;
@@ -198,7 +188,7 @@ class Maze2 extends Maze {
       }
     }
     const chosen = this.chooseMove(possibilities);
-    const opp = this.opposite(chosen);
+    const opp = opposite(chosen);
     this.cells[this.pathIx][chosen] = false;
     const newIx = this.move(this.pathIx, chosen);
     this.cells[newIx][opp] = false;
@@ -210,30 +200,6 @@ class Maze2 extends Maze {
   }
   jumpToRandom() {
     this.pathIx = Math.floor(random(0, CELL_TOTAL));
-  }
-  opposite(dir) {
-    switch (dir) {
-      case NORTH:
-        return SOUTH;
-      case SOUTH:
-        return NORTH;
-      case EAST:
-        return WEST;
-      case WEST:
-        return EAST;
-    }
-  }
-  onNorth(ix) {
-    return ix < CELL_COUNT;
-  }
-  onSouth(ix) {
-    return ix >= CELL_COUNT * (CELL_COUNT - 1);
-  }
-  onEast(ix) {
-    return ix % CELL_COUNT === CELL_COUNT - 1;
-  }
-  onWest(ix) {
-    return ix % CELL_COUNT === 0;
   }
   move(ix, dir) {
     switch (dir) {
@@ -247,50 +213,9 @@ class Maze2 extends Maze {
         return this.west(ix);
     }
   }
-  east(ix) {
-    return ix + 1;
-  }
-  west(ix) {
-    return ix - 1;
-  }
-  north(ix) {
-    return ix - CELL_COUNT;
-  }
-  south(ix) {
-    return ix + CELL_COUNT;
-  }
   cellOpened(ix) {
     const c = this.cells[ix];
     return !(c[NORTH] && c[SOUTH] && c[EAST] && c[WEST]);
-  }
-  neighborSidesOf(ix) {
-    const opts = [];
-    const c = this.cells[ix];
-    if (c[EAST] && !this.onEast(ix)) {
-      opts.push(EAST);
-    }
-    if (c[WEST] && !this.onWest(ix)) {
-      opts.push(WEST);
-    }
-    if (c[NORTH] && !this.onNorth(ix)) {
-      opts.push(NORTH);
-    }
-    if (c[SOUTH] && !this.onSouth(ix)) {
-      opts.push(SOUTH);
-    }
-    return opts;
-  }
-  onSide(ix, side) {
-    switch (side) {
-      case NORTH:
-        return this.onNorth(ix);
-      case SOUTH:
-        return this.onSouth(ix);
-      case EAST:
-        return this.onEast(ix);
-      case WEST:
-        return this.onWest(ix);
-    }
   }
 }
 
