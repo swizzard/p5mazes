@@ -12,10 +12,8 @@ div#content {
         display: flex;
         grid-template-columns: repeat(4, 1fr);
         grid-template-rows: 2fr 1fr;
-        /* input { */
-        /*     display: inline-grid; */
-        /* } */
         > div {
             border: 1px solid #000;
         }
     }
+}
