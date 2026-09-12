@@ -383,6 +383,12 @@ class Maze5 extends Maze4 {
   }
 }
 
+class Maze6 extends Maze5 {
+  get orderedSeen() {
+    return super.orderedSeen.toReversed();
+  }
+}
+
 function getParams() {
   const params = new URLSearchParams(window.location.search);
   CELL_COUNT = parseInt(
@@ -414,6 +420,14 @@ function getParams() {
     case "4":
       MAZE_CLS = Maze4;
       document.querySelector('input.maze-picker[value="4"]').checked = true;
+      break;
+    case "5":
+      MAZE_CLS = Maze5;
+      document.querySelector('input.maze-picker[value="5"]').checked = true;
+      break;
+    case "6":
+      MAZE_CLS = Maze6;
+      document.querySelector('input.maze-picker[value="6"]').checked = true;
       break;
     default:
       MAZE_CLS = Maze5;
