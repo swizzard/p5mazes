@@ -176,8 +176,7 @@ class Maze2 extends Maze {
     super(cellCls ?? Cell);
   }
   openCell() {
-    const possibilities = this.neighborSidesOf(this.pathIx);
-    if (possibilities.length === 0) {
+    if (this.possibilities.length === 0) {
       const _oIx = this.pathIx;
       this.jumpToRandom();
       if (this.pathIx === _oIx) {
@@ -187,31 +186,22 @@ class Maze2 extends Maze {
         return this.openCell();
       }
     }
-    const chosen = this.chooseMove(possibilities);
+    const chosen = this.chooseMove(this.possibilities);
     const opp = opposite(chosen);
     this.cells[this.pathIx][chosen] = false;
-    const newIx = this.move(this.pathIx, chosen);
+    const newIx = this.direction(this.pathIx, chosen);
     this.cells[newIx][opp] = false;
     this.pathIx = newIx;
     return true;
+  }
+  get possibilities() {
+    return this.neighborSidesOf(this.pathIx);
   }
   chooseMove(possibilities) {
     return random(possibilities);
   }
   jumpToRandom() {
     this.pathIx = Math.floor(random(0, CELL_TOTAL));
-  }
-  move(ix, dir) {
-    switch (dir) {
-      case NORTH:
-        return this.north(ix);
-      case SOUTH:
-        return this.south(ix);
-      case EAST:
-        return this.east(ix);
-      case WEST:
-        return this.west(ix);
-    }
   }
   cellOpened(ix) {
     const c = this.cells[ix];
@@ -275,6 +265,108 @@ class Maze6 extends Maze5 {
   }
 }
 
+class Maze7 extends Maze2 {
+  seen = new UniQ();
+
+  constructor(cellCls) {
+    super(cellCls);
+    this.seen.push(0);
+  }
+  openCell() {
+    this.seen.push(this.pathIx);
+    super.openCell();
+  }
+  shouldContinue() {
+    return this.seen.length <= SEEN_LIMIT;
+  }
+  jumpToRandom() {
+    console.log("Maze7.jumpToRandom");
+    for (const ix of this.seen) {
+      if (this.neighborSidesOf(ix).length > 0 && ix !== this.pathIx) {
+        this.pathIx = ix;
+        return;
+      }
+    }
+    this.pathIx = randInt(this.cellCount);
+  }
+}
+
+class Maze8 extends Maze7 {
+  jumpToRandom() {
+    for (const ix of this.seen.rev()) {
+      if (this.neighborSidesOf(ix).length > 0 && ix !== this.pathIx) {
+        this.pathIx = ix;
+        return;
+      }
+    }
+    super.jumpToRandom();
+  }
+}
+
+class Maze9 extends Maze7 {
+  static MIN_LOCAL_WALLS = 8;
+
+  localWallsOf(ix) {
+    const ss = this.neighborSidesOf(ix);
+    let ws = ss.length;
+    for (const s of ss) {
+      ws += this.neighborSidesOf(this.direction(ix, s)).length;
+    }
+    return ws;
+  }
+  jumpToRandom() {
+    for (const ix of this.seen) {
+      if (this.localWallsOf(ix) >= Maze9.MIN_LOCAL_WALLS) {
+        this.pathIx = ix;
+        return;
+      }
+    }
+    super.jumpToRandom();
+  }
+}
+
+class Maze10 extends Maze8 {
+  static MIN_NEIGHBOR_WALLS = 3;
+
+  getPossibilities() {
+    return super.possibilities.filter((s) =>
+      this.validIx(this.direction(this.pathIx, s)),
+    );
+  }
+  get possibleIxs() {
+    const ixs = [];
+    for (let ix = 0; ix < this.cellCount; ix++) {
+      if (this.validIx(ix)) {
+        ixs.push(ix);
+      }
+    }
+    return ixs;
+  }
+  jumpToRandom() {
+    const highestSeen = this.seen.vals.reduce((a, v) => (v > a ? v : a), 0);
+    this.pathIx = randInt(highestSeen, this.cellCount);
+  }
+  validIx(ix) {
+    return this.neighborSidesOf(ix).length >= Maze10.MIN_NEIGHBOR_WALLS;
+  }
+  openCell() {
+    let possibilities = this.getPossibilities();
+    while (possibilities.length === 0) {
+      this.jumpToRandom();
+      // this.pathIx = randInt(this.cellCount);
+      possibilities = this.getPossibilities();
+    }
+    this.seen.push(this.pathIx);
+    const chosen = this.chooseMove(possibilities);
+    const opp = opposite(chosen);
+    this.cells[this.pathIx][chosen] = false;
+    const newIx = this.direction(this.pathIx, chosen);
+    this.cells[newIx][opp] = false;
+    this.pathIx = newIx;
+    return true;
+  }
+}
+
 function getParams() {
   const params = new URLSearchParams(window.location.search);
   CELL_COUNT = parseInt(
@@ -314,6 +406,22 @@ function getParams() {
     case "6":
       MAZE_CLS = Maze6;
       document.querySelector('input.maze-picker[value="6"]').checked = true;
+      break;
+    case "7":
+      MAZE_CLS = Maze7;
+      document.querySelector('input.maze-picker[value="7"]').checked = true;
+      break;
+    case "8":
+      MAZE_CLS = Maze8;
+      document.querySelector('input.maze-picker[value="8"]').checked = true;
+      break;
+    case "9":
+      MAZE_CLS = Maze9;
+      document.querySelector('input.maze-picker[value="9"]').checked = true;
+      break;
+    case "10":
+      MAZE_CLS = Maze10;
+      document.querySelector('input.maze-picker[value="10"]').checked = true;
       break;
     default:
       MAZE_CLS = Maze5;

@@ -5,6 +5,7 @@ const EAST = Symbol("east");
 const WEST = Symbol("west");
 
 class _M {
+  cellCount;
   cellCls;
   cells;
 
@@ -72,6 +73,18 @@ class _M {
       opts.push(SOUTH);
     }
     return opts;
+  }
+  direction(ix, dir) {
+    switch (dir) {
+      case NORTH:
+        return this.north(ix);
+      case SOUTH:
+        return this.south(ix);
+      case EAST:
+        return this.east(ix);
+      case WEST:
+        return this.west(ix);
+    }
   }
   onSide(ix, side) {
     switch (side) {
@@ -153,4 +166,59 @@ function opposite(dir) {
   }
 }
 
+function randInt(min, max) {
+  if (max === undefined) {
+    return Math.floor(random(n + 1));
+  } else {
+    return Math.floor(random(min, max + 1));
+  }
+}
+
+function ixs(cellCount) {
+  return Iterator.from({
+    _ix: 0,
+    next() {
+      if (this._ix >= cellCount * cellCount) {
+        return { done: true, value: undefined };
+      } else {
+        const res = { done: false, value: this._ix };
+        this._ix++;
+        return res;
+      }
+    },
+  });
+}
+
+class UniQ {
+  vals;
+
+  constructor() {
+    this.vals = [];
+  }
+  static from(arr) {
+    const q = new UniQ();
+    q.vals = arr;
+  }
+  [Symbol.iterator]() {
+    return this.vals.toReversed()[Symbol.iterator]();
+  }
+  push(val) {
+    const prevIx = this.vals.indexOf(val);
+    if (prevIx > -1) {
+      this.vals.splice(prevIx, 1);
+    }
+    this.vals.push(val);
+  }
+  get length() {
+    return this.vals.length;
+  }
+  rev() {
+    const vi = this.vals[Symbol.iterator]();
+    return {
+      [Symbol.iterator]() {
+        return vi;
+      },
+    };
+  }
+}
 // biome-ignore-end lint/correctness/noUnusedVariables: lib
