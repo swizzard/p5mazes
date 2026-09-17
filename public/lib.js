@@ -20,7 +20,7 @@ class _M {
     let x = 0;
     let y = 0;
     for (let i = 1; i <= tot; i++) {
-      const cell = new cellCls(x, y);
+      const cell = new cellCls(x, y, this.cellDim, i - 1);
       this.cells.push(cell);
       if (i % this.cellCount === 0) {
         x = 0;
@@ -111,19 +111,23 @@ class _M {
 class _C {
   startX;
   startY;
+  ix;
+  cellDim;
   [NORTH];
   [SOUTH];
   [EAST];
   [WEST];
-  constructor(startX, startY) {
+  constructor(startX, startY, cellDim, ix) {
     this.startX = startX;
     this.startY = startY;
+    this.ix = ix;
+    this.cellDim = cellDim;
   }
   get eastX() {
-    return this.startX + cellDim;
+    return this.startX + this.cellDim;
   }
   get southY() {
-    return this.startY + cellDim;
+    return this.startY + this.cellDim;
   }
   get sides() {
     return [this[NORTH], this[SOUTH], this[EAST], this[WEST]];
@@ -163,6 +167,17 @@ function opposite(dir) {
       return WEST;
     case WEST:
       return EAST;
+  }
+}
+
+function perpendiculars(dir) {
+  switch (dir) {
+    case NORTH:
+    case SOUTH:
+      return [EAST, WEST];
+    case EAST:
+    case WEST:
+      return [NORTH, SOUTH];
   }
 }
 

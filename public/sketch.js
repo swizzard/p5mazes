@@ -49,8 +49,8 @@ class Maze extends _M {
 }
 
 class Cell extends _C {
-  constructor(startX, startY) {
-    super(startX, startY);
+  constructor(startX, startY, cellDim, ix) {
+    super(startX, startY, cellDim, ix);
     this[NORTH] = true;
     this[SOUTH] = true;
     this[EAST] = true;
