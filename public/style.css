@@ -3,17 +3,26 @@ body {
 }
 div#content {
     display: grid;
-    grid-template-rows: auto 10%;
+    grid-template-rows: auto 2fr 1fr 1fr;
     main {
+        grid-row: 1;
         align-self: center;
         justify-self: center;
     }
     div > form {
-        display: flex;
-        grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: 2fr 1fr;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
         > div {
             border: 1px solid #000;
+        }
+    }
+    div#mode p {
+        text-align: center;
+
+        a.current-mode {
+            color: #000;
+            text-decoration: none;
+            cursor: default;
         }
     }
 }

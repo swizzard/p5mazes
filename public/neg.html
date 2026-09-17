@@ -3,6 +3,7 @@
   <head>
     <script src="https://cdn.jsdelivr.net/npm/p5@2.3.2/lib/p5.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="neg-style.css">
     <meta charset="utf-8" />
     <meta property="og:description" content="swizzard dot pizza: p5mazes" />
     <meta property="twitter:description" content="swizzard dot pizza: p5mazes" />
@@ -31,7 +32,7 @@
                     <input id="seenThreshold" name="seenThreshold" type="number" placeholder="65" />
                 </div>
                 <div>
-                    <p>change maze version. <code>maze 1</code> is static; the rest erase walls over time.</p>
+                    <p>change maze version.</p>
                     <div>
                         <input id="maze1" type="radio" class="maze-picker" value="1" name="mazeVersion" />
                         <label for="maze1">maze 1</label>
@@ -39,37 +40,6 @@
                         <label for="maze2">maze 2</label>
                         <input id="maze3" type="radio" class="maze-picker" value="3" name="mazeVersion" />
                         <label for="maze3">maze 3</label>
-                        <input id="maze4" type="radio" class="maze-picker" value="4" name="mazeVersion" />
-                        <label for="maze4">maze 4</label>
-                        <input id="maze5" type="radio" class="maze-picker" value="5" name="mazeVersion" />
-                        <label for="maze5">maze 5</label>
-                        <input id="maze6" type="radio" class="maze-picker" value="6" name="mazeVersion" />
-                        <label for="maze6">maze 6</label>
-                        <input id="maze7" type="radio" class="maze-picker" value="7" name="mazeVersion" />
-                        <label for="maze7">maze 7</label>
-                        <input id="maze8" type="radio" class="maze-picker" value="8" name="mazeVersion" />
-                        <label for="maze8">maze 8</label>
-                        <input id="maze9" type="radio" class="maze-picker" value="9" name="mazeVersion" />
-                        <label for="maze9">maze 9</label>
-                        <input id="maze10" type="radio" class="maze-picker" value="10" name="mazeVersion" />
-                        <label for="maze10">maze 10</label>
-                    </div>
-                </div>
-                <div>
-                    <p>change cell version. <code>cell 0</code> is static, the rest erase 0 - 4 walls when created. thus, combining <code>maze 1</code> &amp; <code>cell 0</code> will result in a static grid. it is recommended that you use <code>cell 0</code> unless you want to use <code>maze 1</code> and vice-versa.</p>
-                    <div>
-                        <input id="cell0" type="radio" class="cell-picker" value="0" name="cellVersion" />
-                        <label for="cell0">cell 0</label>
-                        <input id="cell1" type="radio" class="cell-picker" value="1" name="cellVersion" />
-                        <label for="cell1">cell 1</label>
-                        <input id="cell2" type="radio" class="cell-picker" value="2" name="cellVersion" />
-                        <label for="cell2">cell 2</label>
-                        <input id="cell3" type="radio" class="cell-picker" value="3" name="cellVersion" />
-                        <label for="cell3">cell 3</label>
-                        <input id="cell4" type="radio" class="cell-picker" value="4" name="cellVersion" />
-                        <label for="cell4">cell 4</label>
-                        <input id="cell5" type="radio" class="cell-picker" value="5" name="cellVersion" />
-                        <label for="cell5">cell 5</label>
                     </div>
                 </div>
                 <div>
@@ -78,7 +48,7 @@
             </form>
         </div>
         <div id="mode">
-            <p><a class="current-mode" href="/" title="start with all walls filled" visited>positive mode</a> | <a href="/neg" title="start with no walls filled">negative mode</a></p>
+            <p><a href="/" title="start with all walls filled">positive mode</a> | <a class="current-mode" href="neg" title="start with no walls filled">negative mode</a></p>
         </div>
         <div id="credits">
             <p>made by <a href="https://swizzard.pizza" title="my home page" target="_blank">sam raker</a>. <a href="https://github.com/swizzard/p5mazes" title="the source code on github" target="_blank">source</a>.</p>
@@ -86,7 +56,7 @@
         </div>
     </div>
     <script src="lib.js"></script>
-    <script src="sketch.js"></script>
+    <script src="neg.js"></script>
   </body>
 </html>
 
