@@ -46,6 +46,10 @@ class Maze extends _M {
   shouldContinue() {
     return this.pathIx < this.stopIx;
   }
+  neighborSidesOf(ix) {
+    const c = this.cells[ix];
+    return super.neighborSidesOf(ix).filter((s) => c[s]);
+  }
 }
 
 class Cell extends _C {

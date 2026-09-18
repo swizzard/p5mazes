@@ -60,16 +60,16 @@ class _M {
   neighborSidesOf(ix) {
     const opts = [];
     const c = this.cells[ix];
-    if (c[EAST] && !this.onEast(ix)) {
+    if (!this.onEast(ix)) {
       opts.push(EAST);
     }
-    if (c[WEST] && !this.onWest(ix)) {
+    if (!this.onWest(ix)) {
       opts.push(WEST);
     }
-    if (c[NORTH] && !this.onNorth(ix)) {
+    if (!this.onNorth(ix)) {
       opts.push(NORTH);
     }
-    if (c[SOUTH] && !this.onSouth(ix)) {
+    if (!this.onSouth(ix)) {
       opts.push(SOUTH);
     }
     return opts;
