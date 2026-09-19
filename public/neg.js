@@ -114,6 +114,111 @@ class NegMaze3 extends NegMaze2 {
   }
 }
 
+class NegMaze4 extends NegMaze2 {
+  openCell() {
+    let opts = this.getPossibleMoves(this.ix);
+    while (opts.length === 0) {
+      this.ix = this.randIx;
+      opts = this.getPossibleMoves(this.ix);
+    }
+    const chosenDir = random(opts);
+    const nextIx = this.direction(this.ix, chosenDir);
+    this.cells[this.ix][chosenDir] = true;
+    this.cells[nextIx][opposite(chosenDir)] = true;
+    this.seen.add(this.ix);
+    const nextOpts = this.getNextOpts(this.ix, chosenDir);
+    if (nextOpts.length === 0) {
+      this.ix = this.randIx;
+    } else {
+      this.ix = this.direction(this.ix, random(nextOpts));
+    }
+  }
+  getNextOpts(ix, dir) {
+    const nopts = [];
+    for (const o of perpendiculars(dir)) {
+      if (!this.onSide(ix, o)) {
+        nopts.push(o);
+        nopts.push(o);
+      }
+    }
+    const op = opposite(dir);
+    if (!this.onSide(ix, op)) {
+      nopts.push(op);
+    }
+    return nopts;
+  }
+
+  getPossibleMoves(ix) {
+    const c = this.cells[ix];
+    return this.neighborSidesOf(ix).filter((s) => !c[s]);
+  }
+}
+
+// class NegMaze5 extends NegMaze {
+//   currGoal;
+
+//   constructor() {
+//     super(NegCell, CELL_COUNT);
+//     this.currGoal = randIx;
+//     this.ix = randIx;
+//   }
+
+//   openCell() {}
+
+//   getNextMove(ix) {
+//     const ps = this.neighborSidesOf(ix);
+//     ps.sort((a, b) => {
+//       const da = this.distBetween(this.direction(ix, a), this.currGoal);
+//       const db = this.distBetween(this.direction(ix, b), this.currGoal);
+//       return da - db;
+//     });
+//     const o = [];
+//     for (let i = 0; i < ps.length; i++) {
+//       for (let z = 0; z < ps.length - i; z++) {
+//         o.push(ps[i]);
+//       }
+//     }
+//     return random(o);
+//   }
+
+//   distBetween(a, b) {
+//     const rowA = Math.floor(a / this.cellCount);
+//     const rowB = b % this.cellCount;
+//     const nRows = Math.abs(rowA - rowB);
+//     const colA = a - rowA;
+//     const colB = b - rowB;
+//     const nCols = Math.abs(colA - colB);
+//     return nRows + nCols;
+//   }
+// }
+
+class NegMaze6 extends NegMaze {
+  get randTimes() {
+    return randInt(1, Math.floor(this.cellCount / 10));
+  }
+  randDir(ix) {
+    return random(this.neighborSidesOf(ix));
+  }
+  randPerpendicular(ix, side) {
+    return random(perpendiculars(side).filter((s) => !this.onSide(ix, s)));
+  }
+  openCell() {
+    const times = this.randTimes;
+    const moveDir = this.randDir(this.ix);
+    // const wallDir = this.randDir(this.ix);
+    const wallDir = this.randPerpendicular(this.ix, moveDir);
+    for (let i = 0; i < times; i++) {
+      this.cells[this.ix][wallDir] = true;
+      this.seen.add(this.ix);
+      if (this.onSide(this.ix, moveDir)) {
+        return;
+      } else {
+        this.ix = this.direction(this.ix, moveDir);
+      }
+    }
+  }
+}
+
 // biome-ignore lint/correctness/noUnusedVariables: p5
 function setup() {
   getParams();
@@ -153,6 +258,14 @@ function getParams() {
     case "2":
       MAZE_CLS = NegMaze2;
       document.querySelector('input.maze-picker[value="2"]').checked = true;
+      break;
+    case "4":
+      MAZE_CLS = NegMaze4;
+      document.querySelector('input.maze-picker[value="4"]').checked = true;
+      break;
+    case "6":
+      MAZE_CLS = NegMaze6;
+      document.querySelector('input.maze-picker[value="6"]').checked = true;
       break;
     default:
       MAZE_CLS = NegMaze3;
